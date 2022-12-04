@@ -9,14 +9,21 @@ const LINKING_ERROR =
 const OnlyQrScan = NativeModules.OnlyQrScan
   ? NativeModules.OnlyQrScan
   : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
-    );
+    {},
+    {
+      get() {
+        throw new Error(LINKING_ERROR);
+      },
+    }
+  );
+export const QR_SCAN_EVENT = 'QR_SCAN_EVENT';
+interface ErrorTip {
+  title: string;
+  content: string;
+  confirmText: string;
+  cancelText: string;
 
-export function multiply(a: number, b: number): Promise<number> {
-  return OnlyQrScan.multiply(a, b);
+}
+export function openQRScan(mainColor: string, error: ErrorTip): Promise<string> {
+  return OnlyQrScan.openQRScan(mainColor, error.title, error.content, error.confirmText, error.cancelText);
 }
