@@ -48,10 +48,11 @@ public class OnlyQrScanModule extends ReactContextBaseJavaModule {
 
 
   @ReactMethod
-  public void openQRScan(String color,String title,String content,String confirmText,String cancelText, Promise promise) {
+  public void openQRScan(String color,String type,String title,String content,String confirmText,String cancelText, Promise promise) {
     Activity currentActivity = getCurrentActivity();
     if (currentActivity != null) {
       Intent intent = new Intent(currentActivity, ScanActivity.class);
+      intent.putExtra("type",type);
       intent.putExtra("color",color);
       intent.putExtra("title",title);
       intent.putExtra("content",content);

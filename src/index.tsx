@@ -17,13 +17,13 @@ const OnlyQrScan = NativeModules.OnlyQrScan
     }
   );
 export const QR_SCAN_EVENT = 'QR_SCAN_EVENT';
+export type QR_SCAN_TYPE = 'address' | 'url' | 'all'
 interface ErrorTip {
   title: string;
   content: string;
   confirmText: string;
   cancelText: string;
-
 }
-export function openQRScan(mainColor: string, error: ErrorTip): Promise<string> {
-  return OnlyQrScan.openQRScan(mainColor, error.title, error.content, error.confirmText, error.cancelText);
+export function openQRScan(mainColor: string, type: QR_SCAN_TYPE, error: ErrorTip): Promise<string> {
+  return OnlyQrScan.openQRScan(mainColor, type, error.title, error.content, error.confirmText, error.cancelText);
 }

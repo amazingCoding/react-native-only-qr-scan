@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Log;
 import android.util.Size;
 import android.view.View;
@@ -53,6 +54,7 @@ public class ScanActivity extends AppCompatActivity {
   private BarcodeScanner scanner;
   private ExecutorService cameraExecutor;
   private View scanLine;
+  private String type;
   private class MyAnalyzer implements ImageAnalysis.Analyzer {
 
 
@@ -70,38 +72,39 @@ public class ScanActivity extends AppCompatActivity {
               for (Barcode barcode:barcodes){
                 String rawValue = barcode.getRawValue();
                 int valueType = barcode.getValueType();
-                Log.d(TAG,rawValue);
-
-                // check is ethereum address
                 if(rawValue != null){
-                  // if rawValue start with 'ethereum:' ,remove it
-                  if(rawValue.startsWith("ethereum:")){
-                    rawValue = rawValue.substring(9);
-                  }
-                  if (rawValue.startsWith("0x") && rawValue.length() == 42){
-                    flag = true;
-                    Intent intent = new Intent();
-                    intent.putExtra("result",rawValue);
-                    setResult(RESULT_OK,intent);
-                    finish();
-                  }
+                  boolean isOver = false;
+                  if(type.equals("url") || type.equals("all")){
+                    // check rawValue is a valid url
+                    if(rawValue.startsWith("http://") || rawValue.startsWith("https://")){
+                      Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                      if(vibrator.hasVibrator()){
+                        vibrator.vibrate(200);
+                      }
 
-                  // check rawValue is a valid url
-                  if(rawValue.startsWith("http://") || rawValue.startsWith("https://")){
-                    flag = true;
-                    Intent intent = new Intent();
-                    intent.putExtra("result",rawValue);
-                    setResult(RESULT_OK,intent);
-                    finish();
+                      flag = true;
+                      isOver = true;
+                      Intent intent = new Intent();
+                      intent.putExtra("result",rawValue);
+                      setResult(RESULT_OK,intent);
+                      finish();
+                    }
                   }
-
-                  // check rawValue is a tron address
-                  if(rawValue.startsWith("T") && rawValue.length() == 34){
-                    flag = true;
-                    Intent intent = new Intent();
-                    intent.putExtra("result",rawValue);
-                    setResult(RESULT_OK,intent);
-                    finish();
+                  if(!isOver && (type.equals("address") || type.equals("all"))){
+                    if(rawValue.startsWith("ethereum:")){
+                      rawValue = rawValue.substring(9);
+                    }
+                    if ((rawValue.startsWith("0x") && rawValue.length() == 42) || (rawValue.startsWith("T") && rawValue.length() == 34)){
+                      flag = true;
+                      Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                      if(vibrator.hasVibrator()){
+                        vibrator.vibrate(200);
+                      }
+                      Intent intent = new Intent();
+                      intent.putExtra("result",rawValue);
+                      setResult(RESULT_OK,intent);
+                      finish();
+                    }
                   }
                 }
 
@@ -124,6 +127,7 @@ public class ScanActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_scan);
+    type = getIntent().getStringExtra("type");
     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
     getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS | WindowManager.LayoutParams.FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
